@@ -9,11 +9,11 @@ const app = express();
 app.use(cors());
 app.use(formidableMiddleware());
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true
-});
+// mongoose.connect(process.env.MONGODB_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   useCreateIndex: true
+// });
 
 const marvelRoutes = require("./routes/marvel");
 app.use(marvelRoutes);
@@ -25,4 +25,4 @@ app.all("*", (req, res) => {
   res.json({ message: "Page not found" });
 });
 
-app.listen(process.env.PORT, () => console.log("Server started"));
+app.listen(process.env.PORT || 4000, () => console.log("Server started"));

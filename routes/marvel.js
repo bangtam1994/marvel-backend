@@ -9,8 +9,8 @@ require("dotenv").config();
 //Route pour get characters par page
 
 router.get("/characters", async (req, res) => {
-  const myPublicKey = process.env.myPublicKey;
-  const myPrivateKey = process.env.myPrivateKey;
+  const myPublicKey = process.env.MY_PUBLIC_KEY;
+  const myPrivateKey = process.env.MY_PRIVATE_KEY;
   const ts = uid2(4);
   const hash = md5(ts + myPrivateKey + myPublicKey);
   const limit = 100; //Me donnera les 100 résultats par page
@@ -40,8 +40,8 @@ router.get("/characters", async (req, res) => {
 //Route pour get 1 character par son id
 router.get("/character/:id", async (req, res) => {
   try {
-    const myPublicKey = process.env.myPublicKey;
-    const myPrivateKey = process.env.myPrivateKey;
+    const myPublicKey = process.env.MY_PUBLIC_KEY;
+    const myPrivateKey = process.env.MY_PRIVATE_KEY;
     const ts = uid2(4);
     const hash = md5(ts + myPrivateKey + myPublicKey);
     let characterId = req.params.id;
@@ -56,8 +56,8 @@ router.get("/character/:id", async (req, res) => {
 
 router.get("/character/info/:id", async (req, res) => {
   try {
-    const myPublicKey = process.env.myPublicKey;
-    const myPrivateKey = process.env.myPrivateKey;
+    const myPublicKey = process.env.MY_PUBLIC_KEY;
+    const myPrivateKey = process.env.MY_PRIVATE_KEY;
     const ts = uid2(4);
     const hash = md5(ts + myPrivateKey + myPublicKey);
     let characterId = req.params.id;
@@ -73,8 +73,8 @@ router.get("/character/info/:id", async (req, res) => {
 // Route pour get les infos sur les comics
 
 router.get("/comics", async (req, res) => {
-  const myPublicKey = process.env.myPublicKey;
-  const myPrivateKey = process.env.myPrivateKey;
+  const myPublicKey = process.env.MY_PUBLIC_KEY;
+  const myPrivateKey = process.env.MY_PRIVATE_KEY;
   const ts = uid2(4);
   const hash = md5(ts + myPrivateKey + myPublicKey);
   const limit = 100;
@@ -102,8 +102,8 @@ router.get("/comics", async (req, res) => {
 // Route pour get les favoris
 
 router.get("/favorites", async (req, res) => {
-  const myPublicKey = process.env.myPublicKey;
-  const myPrivateKey = process.env.myPrivateKey;
+  const myPublicKey = process.env.MY_PUBLIC_KEY;
+  const myPrivateKey = process.env.MY_PRIVATE_KEY;
   const ts = uid2(4);
   const hash = md5(ts + myPrivateKey + myPublicKey);
   const limit = 100;
