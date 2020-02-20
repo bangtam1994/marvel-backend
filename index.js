@@ -9,11 +9,11 @@ const app = express();
 app.use(cors());
 app.use(formidableMiddleware());
 
-// mongoose.connect(process.env.MONGODB_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   useCreateIndex: true
-// });
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+});
 
 const marvelRoutes = require("./routes/marvel");
 app.use(marvelRoutes);
