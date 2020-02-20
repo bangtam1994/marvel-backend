@@ -47,10 +47,7 @@ router.get("/character/:id", async (req, res) => {
     const ts = uid2(4);
     const hash = md5(ts + myPrivateKey + myPublicKey);
     let characterId = req.params.id;
-    // console.log("le CHARACTERID est ///////", characterId);
     const myApiComics = `http://gateway.marvel.com/v1/public/characters/${characterId}/comics?apikey=${myPublicKey}&ts=${ts}&hash=${hash}`;
-
-    // console.log("MY API EST ///////", myApi);
 
     const response = await axios.get(myApiComics);
     res.json(response.data);
