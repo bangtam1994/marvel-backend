@@ -6,8 +6,6 @@ const uid2 = require("uid2");
 
 require("dotenv").config();
 
-// API KEY
-
 //Route pour get characters par page
 
 router.get("/characters", async (req, res) => {
