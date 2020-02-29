@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(formidableMiddleware());
 
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect("mongodb://localhost/marvel-backend", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
