@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(formidableMiddleware());
 
-mongoose.connect("mongodb://localhost/marvel-backend", {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true
@@ -25,4 +25,4 @@ app.all("*", (req, res) => {
   res.json({ message: "Page not found" });
 });
 
-app.listen(4000, () => console.log("Server started"));
+app.listen(process.env.PORT, () => console.log("Server started"));
