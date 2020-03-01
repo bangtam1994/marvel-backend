@@ -5,7 +5,7 @@ const encBase64 = require("crypto-js/enc-base64");
 const uid2 = require("uid2");
 const isAuthenticated = require("../middleware/isAuthenticated");
 const md5 = require("js-md5");
-
+const axios = require("axios");
 const User = require("../models/User");
 
 // Route pour se créer un compte
@@ -84,17 +84,28 @@ router.get("/users", async (req, res) => {
 
 router.post("/user/add/favorites", isAuthenticated, async (req, res) => {
   try {
-    let marvelId = req.fields.marvelId;
-    console.log("MARVEL ID IS ?", req.fields.marvelId);
-    console.log("USER FROM FRONT IS?", req.user);
+    const { marvelId, type } = req.fields;
 
     const user = await User.findById(req.user._id);
     console.log("USER IN BACKEND IS ", user);
+
+    const find = await user.favorites.find(ref => {
+      if (ref.marvelId === marvelId) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
     if (user) {
-      user.favorites.push(marvelId);
-      console.log("AFTER PUSH, USER IS ", user);
-      await user.save();
-      res.json(user);
+      if (!find) {
+        user.favorites.push({ marvelId: marvelId, type: type });
+        console.log("AFTER PUSH, USER IS ", user);
+        await user.save();
+        res.json(user.favorites);
+      } else {
+        res.json("Favorite already added");
+      }
     }
   } catch (error) {
     console.log(error.message);
@@ -102,70 +113,114 @@ router.post("/user/add/favorites", isAuthenticated, async (req, res) => {
   }
 });
 
+//Route pour delete un favori à un user
+
+router.post("/user/delete/favorites", isAuthenticated, async (req, res) => {
+  try {
+    const { marvelId, type } = req.fields;
+    const user = await User.findById(req.user._id);
+    console.log("la");
+
+    if (user) {
+      let index;
+
+      for (let i = 0; i < user.favorites.length; i++) {
+        if (user.favorites[i].marvelId === marvelId) {
+          index = i;
+          break;
+        }
+      }
+      if (index > -1) {
+        user.favorites.splice(index, 1);
+        await user.save();
+        res.json("Favorite deleted");
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.json(error.message);
+  }
+});
+
+// Route simple pour afficher les favoris enregistré dans MongoDB
+
+router.get("/user/favorites/check", isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json(user.favorites);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+});
+
 // Route pour afficher les favoris du User depuis l'API marvel
 
-router.get("/user/favorites", async (req, res) => {
-  const myPublicKey = "66db6be98f9cdefd20b3b38a1f9bfcbf";
-  const myPrivateKey = "9777ea65bbc68773dbd54bfabb489c275db5b48e";
+router.get("/user/favorites/", isAuthenticated, async (req, res) => {
+  const myPublicKey = process.env.MY_PUBLIC_KEY;
+  const myPrivateKey = process.env.MY_PRIVATE_KEY;
   const ts = uid2(4);
   const hash = md5(ts + myPrivateKey + myPublicKey);
-  const limit = 100;
-  const fav = req.query.fav; // Va recevoir un tableau
-  console.log(">>>>>>> USER : LE FAV DU FRONTEND EST:", fav);
+  let tabFavCharac = [];
+  let tabFavComic = [];
 
   try {
-    let newFavCharacters;
-    if (fav !== null) {
-      // Je transforme la cookie (string) de myFavCharacters en un tableau d'ID pour mapper par la suite dessus
-      newFavCharacters = JSON.parse("[" + fav + "]");
-      // console.log("LE NOUVEAU FAV PARSE  EST ", newFavCharacters);
+    // Recherche du User dans MongoDB
+    const user = await User.findById(req.user._id);
+    //user.favorites = [{marvelId, type:comic}, {marvelId, type:charac}, ]
+    if (user) {
+      if (user.favorites && user.favorites.length !== 0) {
+        //Construction des 2 tableaux Favoris (comic et charac)
+        for (let i = 0; i < user.favorites.length; i++) {
+          if (user.favorites[i].type === "charac") {
+            tabFavCharac.push(user.favorites[i]);
+          } else {
+            tabFavComic.push(user.favorites[i]);
+          }
+        }
+        // Envoi de la requête Character à marvel
+        let resultFavCharac = [];
 
-      // newFavCharacters = [111, 222, 333]  ---> Tableaux de chiffres
-      let resultFav = [];
-      try {
-        for (let i = 0; i < newFavCharacters.length; i++) {
-          // console.log("LE FAV CHARACTER [i] EST", newFavCharacters[i]);
-
-          const response = await axios.get(
-            `https://gateway.marvel.com/v1/public/characters/${newFavCharacters[i]}?apikey=${myPublicKey}&ts=${ts}&hash=${hash}`
-          );
-          console.log(
-            ">>>>>> USER : LA REPONSE DE MARVEL EST:",
-            response.data.data
-          );
-
+        for (let i = 0; i < tabFavCharac.length; i++) {
+          let link = `https://gateway.marvel.com/v1/public/characters/${tabFavCharac[i].marvelId}?apikey=${myPublicKey}&ts=${ts}&hash=${hash}`;
+          const response = await axios.get(link);
           let newObj = {};
           newObj.id = response.data.data.results[0].id;
           newObj.name = response.data.data.results[0].name;
           newObj.description = response.data.data.results[0].description;
+          newObj.urlPicture =
+            response.data.data.results[0].thumbnail.path +
+            "/standard_medium." +
+            response.data.data.results[0].thumbnail.extension;
+          resultFavCharac.push(newObj);
+        }
 
+        // Envoi de la requête Comics à marvel
+        let resultFavComic = [];
+        for (let i = 0; i < tabFavComic.length; i++) {
+          const response = await axios.get(
+            `https://gateway.marvel.com/v1/public/comics/${tabFavComic[i]}?apikey=${myPublicKey}&ts=${ts}&hash=${hash}`
+          );
+          let newObj = {};
+          newObj.id = response.data.data.results[0].id;
+          newObj.name = response.data.data.results[0].title;
+          newObj.description = response.data.data.results[0].description;
           newObj.urlPicture =
             response.data.data.results[0].thumbnail.path +
             "/standard_medium." +
             response.data.data.results[0].thumbnail.extension;
 
-          resultFav.push(newObj);
+          resultFavComic.push(newObj);
         }
-        res.json(resultFav);
-      } catch (error) {
-        console.log(error.message);
+        console.log(resultFavCharac);
+
+        res.json({ charac: resultFavCharac, comic: resultFavComic });
+      } else {
+        res.json("No favorites for this user");
       }
-    } else {
-      res.json("No fav added!");
     }
   } catch (error) {
     res.json({ message: error.message });
   }
 });
 
-// Route GET les  favoris du user
-
-router.get("/user/favorites", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.json({ message: error.message });
-  }
-});
 module.exports = router;
