@@ -104,8 +104,8 @@ Please check :
 
 ## Contact
 
-<a  href="https://www.linkedin.com/in/bangtamnguyen"  target="_blank"> <img src="https://lh3.googleusercontent.com/proxy/_ykNtwIOihB2uh4y86nzq8FFoWoVuzB1cq6zcjdmlbhqJ0D5lb8Lmf1-VudVwF2jY9F3cRPd38LxbERFNshl5s7TntVTXCCeIYG0BhU" 
-width="50"
+<a  href="https://www.linkedin.com/in/bangtamnguyen"  target="_blank"> <img src="https://salon-ctco.com/wp-content/uploads/2018/09/Logo-LinkedIn.png" 
+width="45"
 /></a>
 <a  href="mailto:bangtam1994@hotmail.com"  target="_blank"> <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" 
 width="40"
